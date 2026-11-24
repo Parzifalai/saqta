@@ -30,7 +30,7 @@ button{cursor:pointer}
 
 /* ---------- desktop stage: notes on the left, phone on the right ---------- */
 .stage{min-height:100%;display:grid;grid-template-columns:minmax(260px,380px) auto;gap:56px;justify-content:center;align-items:center;padding:40px 24px}
-.notes h1{font-size:40px;line-height:1.05;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
+.notes h1{font-size:56px;line-height:1.05;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
 .notes p{color:var(--muted);margin:0 0 16px;max-width:36ch}
 .notes .jump{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}
 .notes .jump button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;min-height:40px}
@@ -207,12 +207,8 @@ label.f{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
 <body>
 <a class="skip" href="#app">Skip to the prototype</a>
 <div class="stage">
-  <aside class="notes" aria-label="About this prototype">
+  <aside class="notes" aria-label="Saqta">
     <h1 style="display:flex;align-items:center;gap:14px"><svg aria-hidden="true" width="56" height="56" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" rx="56" fill="#1F5B3F"/><g transform="translate(128 128) scale(0.9) translate(-128 -157)"><path fill="#FFFFFF" d="M40 132 L84 132 A44 44 0 0 0 172 132 L216 132 L216 214 A12 12 0 0 1 204 226 L52 226 A12 12 0 0 1 40 214 Z"/><path fill="#FFD23F" d="M96 120 A32 32 0 0 1 160 120 Z"/></g></svg>saqta</h1>
-    <p>Cafes and bakeries in Almaty sell food left at closing time as a discounted box. You reserve, pay in the app and pick it up with a code.</p>
-    <p>Clickable prototype v2 — HCI Practice Work 4, Team 2. Prices and venues are demo data.</p>
-    <div class="jump" id="jump" aria-label="Jump to a screen"></div>
-    <small>Try: switch on “no dairy”, open Baursak House (allergen warning), pay at Coffee Point (first payment fails on purpose), cancel a reservation, then switch to the partner side in Profile and publish a box.</small>
   </aside>
   <div class="device">
     <div class="app" id="app" role="application" aria-label="Saqta app">
