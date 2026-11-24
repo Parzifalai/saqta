@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saqta — surplus food boxes in Almaty (prototype)</title>
+<meta name="description" content="Clickable prototype of Saqta: cafes and bakeries in Almaty sell food left at closing time as discounted boxes. SDG 12.3. HCI Practice Work 4, Team 2.">
+<meta name="theme-color" content="#1F5B3F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FFD23F'/%3E%3Cpath d='M20 26h24l-3 22H23z' fill='%231F5B3F'/%3E%3Cpath d='M26 26a6 6 0 0 1 12 0' stroke='%231F5B3F' stroke-width='4' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Neucha&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFFFFF; --bg:#F1F3EE; --ink:#1B2A22; --muted:#56635B; --line:#DCE2DA;
+  --green:#1F5B3F; --green-2:#2E7A55; --green-soft:#E3EFE7;
+  --sticker:#FFD23F; --sticker-ink:#3A2A00;
+  --error:#A8231B; --error-soft:#FBE9E7; --warn-soft:#FFF4CC;
+  --r-s:8px; --r-m:14px; --r-l:22px;
+  --font:'Onest', system-ui, sans-serif; --hand:'Neucha', 'Comic Sans MS', cursive;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--green-2);outline-offset:2px;border-radius:6px}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:99;background:#fff;padding:8px 12px}
+
+/* ---------- desktop stage: notes on the left, phone on the right ---------- */
+.stage{min-height:100%;display:grid;grid-template-columns:minmax(260px,380px) auto;gap:56px;justify-content:center;align-items:center;padding:40px 24px}
+.notes h1{font-size:40px;line-height:1.05;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
+.notes p{color:var(--muted);margin:0 0 16px;max-width:36ch}
+.notes .jump{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}
+.notes .jump button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;min-height:40px}
+.notes .jump button:hover{border-color:var(--green)}
+.notes small{display:block;color:var(--muted);font-size:13px;max-width:40ch}
+.device{width:390px;height:844px;border-radius:48px;background:#0E1511;padding:12px;box-shadow:0 30px 60px -30px rgba(27,42,34,.45)}
+.app{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;background:var(--paper);display:flex;flex-direction:column}
+@media (max-width:860px){
+  .stage{display:block;padding:0}
+  .notes{display:none}
+  .device{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none}
+  .app{border-radius:0}
+}
+
+/* ---------- app chrome ---------- */
+.status{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 26px;font-size:14px;font-weight:600}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:#fff;padding-bottom:10px}
+.tabbar button{background:none;border:0;padding:10px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);min-height:56px}
+.tabbar button[aria-current="page"]{color:var(--green);font-weight:700}
+.tabbar svg{width:24px;height:24px}
+.pad{padding:0 20px}
+.top{display:flex;align-items:center;gap:12px;padding:8px 20px 12px}
+.back{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;flex:none}
+.top h2{font-size:20px;margin:0;font-weight:700}
+h3{font-size:17px;margin:20px 0 8px}
+.lead{color:var(--muted);margin:4px 0 0;font-size:15px}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border-radius:var(--r-m);border:0;background:var(--green);color:#fff;font-weight:700;font-size:16px;padding:0 18px;transition:background .15s ease-out, transform .1s ease-out}
+.btn:hover{background:var(--green-2)} .btn:active{transform:scale(.98)}
+.btn[disabled]{background:#AAB5AE;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.danger{background:#fff;color:var(--error);border:1px solid #E6B8B3}
+.link{background:none;border:0;color:var(--green);font-weight:600;padding:10px 0;min-height:44px;text-decoration:underline;text-underline-offset:3px}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 20px 4px;scrollbar-width:none}
+.chips.wrap{flex-wrap:wrap;padding:0}
+.chip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:0 14px;min-height:40px;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip .x{font-weight:700}
+
+/* the price sticker — the one loud element */
+.sticker{position:relative;width:74px;height:74px;border-radius:50%;background:var(--sticker);color:var(--sticker-ink);display:grid;place-items:center;text-align:center;transform:rotate(-8deg);flex:none;box-shadow:inset 0 0 0 3px rgba(255,255,255,.55)}
+.sticker b{font-family:var(--hand);font-size:23px;line-height:1;font-weight:400;display:block}
+.sticker s{font-size:11px;opacity:.75;display:block;margin-top:2px}
+.sticker.big{width:104px;height:104px}.sticker.big b{font-size:32px}.sticker.big s{font-size:13px}
+.sticker.gone{background:#E6E8E4;color:#5C635E;box-shadow:none}
+
+/* box card */
+.card{display:flex;gap:14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:var(--r-l);background:#fff;width:100%;text-align:left;margin-bottom:12px}
+.card:hover{border-color:#B7C3BB}
+.card .meta{flex:1;min-width:0}
+.card .name{font-weight:700;font-size:16px;margin:0}
+.card .kind{color:var(--muted);font-size:13px;margin:0 0 6px}
+.row{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--ink)}
+.row span{display:inline-flex;align-items:center;gap:4px}
+.row svg{width:15px;height:15px;flex:none}
+.left{font-weight:700;color:var(--green)}
+.card.out{opacity:.72}
+.card.out .left{color:var(--muted)}
+.warnline{margin-top:6px;font-size:12.5px;color:#6B4D00;background:var(--warn-soft);border-radius:6px;padding:3px 8px;display:inline-block}
+
+/* skeleton */
+.sk{border-radius:var(--r-l);height:104px;margin-bottom:12px;background:linear-gradient(90deg,#EEF1EC 0%,#F7F8F5 50%,#EEF1EC 100%);background-size:200% 100%;animation:sh 1.1s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+
+/* segmented */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:12px;padding:4px;margin:0 20px 12px}
+.seg button{border:0;background:none;min-height:40px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* impact strip */
+.impact{margin:0 20px 16px;border-radius:var(--r-m);background:var(--green);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.impact b{font-size:26px;font-weight:800;letter-spacing:-.01em}
+.impact span{font-size:13px;opacity:.9;line-height:1.3}
+
+/* map */
+.map{margin:0 20px 12px;border-radius:var(--r-l);overflow:hidden;border:1px solid var(--line);position:relative;height:330px;background:#E9EEE6}
+.pin{position:absolute;transform:translate(-50%,-100%);border:0;background:none;padding:0}
+.pin span{display:block;background:var(--sticker);color:var(--sticker-ink);font-family:var(--hand);font-size:16px;padding:4px 9px;border-radius:999px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.18);white-space:nowrap}
+.pin.out span{background:#D5DAD3;color:#555}
+.pin::after{content:"";display:block;width:10px;height:10px;margin:-3px auto 0;background:#fff;transform:rotate(45deg);border-radius:2px}
+.me{position:absolute;width:18px;height:18px;border-radius:50%;background:#2F6FDE;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,111,222,.18)}
+
+/* details */
+.hero{height:200px;background:var(--green-soft);position:relative;display:grid;place-items:center}
+.hero .sticker{position:absolute;right:20px;bottom:-30px}
+.hero .back{position:absolute;left:16px;top:8px}
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:4px 9px;font-size:13px;background:var(--bg);border:1px solid var(--line)}
+.tag.hit{background:var(--warn-soft);border-color:#E9CF7A;color:#5C4200;font-weight:600}
+.list{margin:0;padding-left:20px}.list li{margin-bottom:4px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.fact{border:1px solid var(--line);border-radius:var(--r-m);padding:10px 12px}
+.fact small{display:block;color:var(--muted);font-size:12.5px}
+.fact b{font-size:15px}
+.stepper{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;width:max-content}
+.stepper button{width:48px;height:46px;border:0;background:#fff;font-size:22px}
+.stepper button:disabled{color:#BBB;cursor:not-allowed}
+.stepper output{width:44px;text-align:center;font-weight:700}
+.sticky{position:sticky;bottom:0;background:linear-gradient(to top,#fff 75%,rgba(255,255,255,0));padding:16px 20px 16px}
+.note{font-size:13px;color:var(--muted);margin:8px 0 0;text-align:center}
+
+/* sheet + dialog */
+.scrim{position:absolute;inset:0;background:rgba(14,21,17,.45);display:flex;align-items:flex-end;z-index:20;animation:fade .2s ease-out}
+.sheet{background:#fff;width:100%;border-radius:24px 24px 0 0;padding:10px 20px 24px;animation:up .25s ease-out;max-height:92%;overflow:auto}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.dialog{margin:auto 20px;background:#fff;border-radius:var(--r-l);padding:22px 20px;animation:fade .2s ease-out}
+.scrim.center{align-items:center}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.pay{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:var(--r-m);padding:12px 14px;margin-bottom:10px;min-height:56px;cursor:pointer}
+.pay input{width:20px;height:20px;accent-color:var(--green)}
+.pay:has(input:checked){border-color:var(--green);background:var(--green-soft)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:14px 0;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--green);flex:none;margin-top:1px}
+.alert{border-radius:var(--r-m);padding:12px 14px;margin:0 0 14px;display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.alert.err{background:var(--error-soft);color:var(--error)}
+.alert.warn{background:var(--warn-soft);color:#5C4200}
+.alert svg{width:20px;height:20px;flex:none;margin-top:1px}
+.sum{display:flex;justify-content:space-between;font-size:15px;margin:6px 0}
+.sum.total{font-weight:800;font-size:18px;border-top:1px dashed var(--line);padding-top:10px;margin-top:10px}
+
+/* ticket */
+.ticket{margin:8px 20px 16px;border-radius:var(--r-l);background:var(--ink);color:#fff;padding:22px 20px;position:relative;overflow:hidden}
+.ticket small{opacity:.75;font-size:13px}
+.code{font-size:44px;font-weight:800;letter-spacing:.06em;margin:4px 0 14px}
+.count{display:flex;align-items:baseline;gap:8px}
+.count b{font-size:30px;font-variant-numeric:tabular-nums}
+.ticket .sticker{position:absolute;right:16px;top:16px;animation:stamp .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{from{transform:rotate(-30deg) scale(1.8);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}
+.steps{margin:0 20px;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;margin-bottom:12px;font-size:15px}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--green-soft);color:var(--green);font-weight:700;display:grid;place-items:center;flex:none;font-size:14px}
+
+/* forms (partner) */
+label.f{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+.input{width:100%;min-height:48px;border:1px solid #B9C3BC;border-radius:12px;padding:10px 12px;background:#fff}
+.input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px rgba(31,91,63,.2)}
+.input[aria-invalid="true"]{border-color:var(--error)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:4px}
+.err-t{font-size:13px;color:var(--error);margin-top:4px;display:flex;gap:4px;align-items:center}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.live{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:var(--r-m);padding:12px 14px;margin-bottom:10px}
+.bar{height:8px;border-radius:4px;background:var(--bg);overflow:hidden;margin-top:6px;width:150px}
+.bar i{display:block;height:100%;background:var(--green)}
+
+/* empty */
+.empty{text-align:center;padding:30px 28px}
+.empty svg{width:96px;height:96px;margin-bottom:8px}
+.empty h3{margin:8px 0 6px}
+.empty p{color:var(--muted);margin:0 0 16px;font-size:15px}
+
+/* toast */
+.toast{position:absolute;left:16px;right:16px;bottom:84px;background:var(--ink);color:#fff;border-radius:12px;padding:12px 14px;font-size:14px;z-index:30;display:flex;gap:8px;align-items:center;animation:up .2s ease-out}
+.toast svg{width:18px;height:18px;flex:none}
+
+/* welcome */
+.welcome{padding:24px 24px 24px;display:flex;flex-direction:column;min-height:100%}
+.welcome .mark{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}
+.welcome h1{font-size:34px;line-height:1.08;letter-spacing:-.02em;margin:36px 0 12px;font-weight:800}
+.welcome .lang{display:flex;gap:8px;margin:0 0 20px}
+.welcome .grow{flex:1}
+.rule{display:flex;gap:12px;align-items:flex-start;margin:0 0 14px;font-size:15px}
+.rule svg{width:22px;height:22px;flex:none;color:var(--green);margin-top:1px}
+.badge{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#app">Skip to the prototype</a>
+<div class="stage">
+  <aside class="notes" aria-label="About this prototype">
+    <h1>Saqta</h1>
+    <p>Cafes and bakeries in Almaty sell food left at closing time as a discounted box. You reserve, pay in the app and pick it up with a code.</p>
+    <p>Clickable prototype v2 — HCI Practice Work 4, Team 2. Prices and venues are demo data.</p>
+    <div class="jump" id="jump" aria-label="Jump to a screen"></div>
+    <small>Try: switch on “no dairy”, open Baursak House (allergen warning), pay at Coffee Point (first payment fails on purpose), cancel a reservation, then switch to the partner side in Profile and publish a box.</small>
+  </aside>
+  <div class="device">
+    <div class="app" id="app" role="application" aria-label="Saqta app">
+      <div class="status" aria-hidden="true"><span id="clock">19:02</span><span>5G ▮▮▮</span></div>
+      <main class="screen" id="screen" tabindex="-1"></main>
+      <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+      <div aria-live="polite" id="live" class="sr" style="position:absolute;left:-9999px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Saqta prototype v2 — vanilla JS, no build step.
+   State lives in S; render() redraws the current screen.
+   ============================================================ */
+const T = {
+ en:{
+  hello:"Good food at closing time, not in the bin.", pickLang:"Language", noEat:"I don't eat", noEatHint:"We warn you before you pay if a box may contain it.",
+  r1:"Cafes post what is left today, usually after 17:00.", r2:"You pay up to 70% less and pick the box up yourself.", r3:"Inside is a surprise, but the partner lists what is usually there and the allergens.",
+  start:"Show boxes near me", near:"Near IITU, Manas St", today:"Today near you", list:"List", map:"Map",
+  now:"Pick up now", later:"Later tonight", km:"Within 1 km", left:n=>n+" left", sold:"Sold out", soldNext:"Usually back tomorrow at 18:00",
+  saved:"kg of food saved by Saqta users this week", demo:"demo data",
+  emptyT:"No boxes match your filters", emptyP:"Boxes in this area sell out by 20:00. Clear a filter or look further away.", clear:"Clear filters",
+  inside:"Usually inside", allerg:"Allergens", pickup:"Pickup", dist:"Distance", worth:"Worth", rating:"Rating",
+  howMany:"How many boxes", reserve:p=>"Reserve for "+p, mayContain:x=>"May contain "+x+" — you said you don't eat it.",
+  cancelRule:"Free cancel until 1 hour before pickup.", payT:"Pay for your box", kaspi:"Kaspi QR", card:"Bank card •• 4417",
+  iChecked:"I checked the allergens and the pickup time", pay:p=>"Pay "+p, boxes:"Boxes", fee:"Service fee", total:"Total", free:"0 ₸",
+  payErr:"Payment didn't go through: the bank declined the card. Your box is held for 5:00. Try again or choose Kaspi QR.", held:"Held for you",
+  paidT:"Reserved", code:"Pickup code", startsIn:"Pickup starts in", open:"Pickup is open now", show:"Show the code at the counter",
+  s1:"Go to the venue between", s2:"Say “Saqta” and show this code", s3:"Take your box — and enjoy it today", cancel:"Cancel reservation",
+  cancelQ:"Cancel this reservation?", cancelP:"You get the full amount back to the same card. The box goes back on sale.", keep:"Keep it", yesCancel:"Yes, cancel",
+  cancelled:"Reservation cancelled. Money back in 1–3 days.", lateCancel:"Free cancel ended at ",
+  orders:"My boxes", active:"Active", past:"Past", noOrders:"No boxes yet", noOrdersP:"Reserve your first box — most cafes post after 17:00.", find:"Find a box",
+  you:"You saved", yourKg:"kg of food from the bin", profile:"Profile", lang:"Language", prefs:"I don't eat", partnerSide:"Switch to partner side", userSide:"Switch to buyer side",
+  home:"Boxes", ordersTab:"My boxes", profileTab:"Profile",
+  pHome:"Today’s boxes", pPost:"Post a box", pCheck:"Check a code", pWhat:"What is inside", pWhatHint:"Pick what usually goes in. People see this before they pay.",
+  pCount:"How many boxes", pFrom:"Pickup from", pTo:"Pickup until", pPrice:"Price per box", pPriceHint:v=>"Shelf value about "+v+". Saqta suggests at least 50% off.",
+  pAll:"Allergens", publish:"Publish box", published:n=>"Published. "+n+" boxes are live.", pErrWhat:"Choose at least one thing.", pErrTime:"Pickup must end after it starts.",
+  pErrPrice:"Price must be at most half of the shelf value.",
+  sold2:(a,b)=>a+" of "+b+" reserved", codeLabel:"Pickup code from the buyer", checkBtn:"Check code", okCode:n=>"Valid. Hand over 1 box to "+n+".", badCode:"No reservation with this code today. Check the letters SQ- and the 4 digits.",
+  kgToday:"kg saved today", min:"min",
+ },
+ ru:{
+  hello:"Хорошая еда к закрытию — не в мусорку.", pickLang:"Язык", noEat:"Я не ем", noEatHint:"Предупредим перед оплатой, если в боксе может быть это.",
+  r1:"Кафе выкладывают то, что осталось сегодня, обычно после 17:00.", r2:"Вы платите до 70% меньше и забираете бокс сами.", r3:"Состав — сюрприз, но партнёр пишет, что обычно внутри, и аллергены.",
+  start:"Показать боксы рядом", near:"Рядом с МУИТ, ул. Манаса", today:"Сегодня рядом", list:"Список", map:"Карта",
+  now:"Забрать сейчас", later:"Позже вечером", km:"До 1 км", left:n=>"осталось "+n, sold:"Разобрали", soldNext:"Обычно снова завтра в 18:00",
+  saved:"кг еды спасли пользователи Saqta за неделю", demo:"демо-данные",
+  emptyT:"Нет боксов под ваши фильтры", emptyP:"Здесь боксы разбирают к 20:00. Уберите фильтр или посмотрите дальше.", clear:"Сбросить фильтры",
+  inside:"Обычно внутри", allerg:"Аллергены", pickup:"Получение", dist:"Расстояние", worth:"Стоит в кафе", rating:"Оценка",
+  howMany:"Сколько боксов", reserve:p=>"Забронировать за "+p, mayContain:x=>"Может содержать: "+x+" — вы отметили, что не едите это.",
+  cancelRule:"Бесплатная отмена — до часа до получения.", payT:"Оплата бокса", kaspi:"Kaspi QR", card:"Карта •• 4417",
+  iChecked:"Я проверил(а) аллергены и время получения", pay:p=>"Оплатить "+p, boxes:"Боксы", fee:"Сервисный сбор", total:"Итого", free:"0 ₸",
+  payErr:"Оплата не прошла: банк отклонил карту. Бокс держим за вами 5:00. Повторите или выберите Kaspi QR.", held:"Держим за вами",
+  paidT:"Забронировано", code:"Код получения", startsIn:"Получение через", open:"Получение уже открыто", show:"Покажите код на кассе",
+  s1:"Приходите в заведение с", s2:"Скажите «Saqta» и покажите код", s3:"Заберите бокс — и съешьте сегодня", cancel:"Отменить бронь",
+  cancelQ:"Отменить бронь?", cancelP:"Вся сумма вернётся на ту же карту. Бокс снова появится в продаже.", keep:"Оставить", yesCancel:"Да, отменить",
+  cancelled:"Бронь отменена. Деньги вернутся за 1–3 дня.", lateCancel:"Бесплатная отмена закончилась в ",
+  orders:"Мои боксы", active:"Активные", past:"Прошлые", noOrders:"Пока нет боксов", noOrdersP:"Забронируйте первый — большинство кафе выкладывают после 17:00.", find:"Найти бокс",
+  you:"Вы спасли", yourKg:"кг еды от мусорки", profile:"Профиль", lang:"Язык", prefs:"Я не ем", partnerSide:"Перейти в режим партнёра", userSide:"Перейти в режим покупателя",
+  home:"Боксы", ordersTab:"Мои боксы", profileTab:"Профиль",
+  pHome:"Боксы сегодня", pPost:"Выложить бокс", pCheck:"Проверить код", pWhat:"Что внутри", pWhatHint:"Отметьте, что обычно кладёте. Покупатель видит это до оплаты.",
+  pCount:"Сколько боксов", pFrom:"Получение с", pTo:"Получение до", pPrice:"Цена бокса", pPriceHint:v=>"В кафе это стоит около "+v+". Saqta советует скидку от 50%.",
+  pAll:"Аллергены", publish:"Выложить бокс", published:n=>"Выложено. В продаже "+n+" боксов.", pErrWhat:"Выберите хотя бы одно.", pErrTime:"Конец получения должен быть позже начала.",
+  pErrPrice:"Цена должна быть не больше половины стоимости в кафе.",
+  sold2:(a,b)=>"забронировано "+a+" из "+b, codeLabel:"Код получения от покупателя", checkBtn:"Проверить код", okCode:n=>"Код верный. Выдайте 1 бокс: "+n+".", badCode:"Сегодня нет брони с таким кодом. Проверьте буквы SQ- и 4 цифры.",
+  kgToday:"кг спасено сегодня", min:"мин",
+ }
+};
+const DIET = {en:{meat:"meat",gluten:"gluten",dairy:"dairy",nuts:"nuts"}, ru:{meat:"мясо",gluten:"глютен",dairy:"молочное",nuts:"орехи"}};
+const ITEMS = {en:["Bread","Pastries","Sandwich","Salad","Hot meal","Dessert","Coffee"], ru:["Хлеб","Выпечка","Сэндвич","Салат","Горячее","Десерт","Кофе"]};
+
+const BOXES = [
+ {id:"nan", name:"Nan & Co", kind:{en:"Bakery",ru:"Пекарня"}, price:990, worth:2900, from:"19:30", to:"20:30", km:0.4, left:3, total:6, rating:4.7,
+  inside:{en:["2–3 loaves or baursaks","1–2 sweet buns"],ru:["2–3 хлеба или баурсака","1–2 сладкие булочки"]}, all:["gluten","dairy"], x:38, y:42},
+ {id:"baur", name:"Baursak House", kind:{en:"Kazakh kitchen",ru:"Казахская кухня"}, price:1600, worth:4800, from:"20:00", to:"21:00", km:0.7, left:2, total:5, rating:4.5,
+  inside:{en:["Plov or manti portion","Baursaks","Salad of the day"],ru:["Порция плова или мантов","Баурсаки","Салат дня"]}, all:["meat","gluten","dairy"], x:62, y:30},
+ {id:"cofp", name:"Coffee Point", kind:{en:"Coffee shop",ru:"Кофейня"}, price:1250, worth:3600, from:"19:00", to:"20:00", km:0.3, left:4, total:6, rating:4.8, failOnce:true,
+  inside:{en:["Croissant or muffin ×2","Sandwich"],ru:["Круассан или маффин ×2","Сэндвич"]}, all:["gluten","dairy","nuts"], x:30, y:62},
+ {id:"green", name:"Green Bowl", kind:{en:"Salads & bowls",ru:"Салаты и боулы"}, price:1800, worth:4200, from:"21:00", to:"22:00", km:1.4, left:5, total:5, rating:4.6,
+  inside:{en:["2 bowls or salads","Fruit cup"],ru:["2 боула или салата","Фруктовый стаканчик"]}, all:["nuts"], x:78, y:70},
+ {id:"sweet", name:"Qant Desserts", kind:{en:"Desserts",ru:"Десерты"}, price:1400, worth:3900, from:"19:00", to:"20:00", km:0.9, left:0, total:4, rating:4.4,
+  inside:{en:["3–4 cakes or eclairs"],ru:["3–4 пирожных или эклера"]}, all:["gluten","dairy","nuts"], x:52, y:78},
+];
+
+const S = { lang:"en", side:"user", screen:"welcome", tab:"home", view:"list", diet:new Set(), f:{now:false,km:false},
+  loading:true, box:null, qty:1, pay:"card", checked:false, payErr:false, orders:[], past:[{name:"Nan & Co",price:990,kg:1.2,date:"21 Nov"}],
+  partner:{boxes:[{what:["Bread","Pastries"],count:6,sold:3,from:"19:30",to:"20:30",price:990}], what:new Set(["Bread"]), count:4, from:"20:00", to:"21:00", price:1200, errs:{}, codeMsg:null},
+  modal:null, toast:null, now:new Date(2026,10,24,19,2) };
+const t = k => T[S.lang][k];
+const fmt = n => n.toLocaleString("ru-RU").replace(/ /g," ")+" ₸";
+const $ = s => document.querySelector(s);
+const ico = {
+ pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+ clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+ back:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg>',
+ bag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>',
+ list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+ user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+ plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg>',
+ err:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>',
+ warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>',
+ leaf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19l8-8"/></svg>',
+};
+const bagArt = (w=150) => `<svg width="${w}" viewBox="0 0 160 150" aria-hidden="true"><path d="M30 52h100l-9 88H39z" fill="#C9A26B"/><path d="M30 52h100l-2 14H32z" fill="#B48B54"/><path d="M58 52c0-16 10-26 22-26s22 10 22 26" fill="none" stroke="#8A6A3C" stroke-width="6" stroke-linecap="round"/><circle cx="80" cy="98" r="20" fill="#1F5B3F"/><path d="M71 99l6 6 12-13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 46c4-14 18-18 26-10" fill="#E9C46A"/><ellipse cx="104" cy="44" rx="16" ry="10" fill="#D98E4A"/></svg>`;
+
+function hits(b){ return b.all.filter(a=>S.diet.has(a)); }
+function visible(){
+  return BOXES.filter(b=>{
+    if (S.f.km && b.km>1) return false;
+    if (S.f.now && b.from>"19:30") return false;
+    if ([...S.diet].some(d=>b.all.includes(d)) && S.dietStrict) return false;
+    return true;
+  });
+}
+
+/* ---------------- screens ---------------- */
+const V = {};
+V.welcome = () => `
+<div class="welcome">
+  <div class="mark"><span class="sticker" style="width:44px;height:44px"><b style="font-size:16px">−70</b></span>Saqta</div>
+  <h1>${t("hello")}</h1>
+  <div class="lang" role="group" aria-label="${t("pickLang")}">
+    <button class="chip" aria-pressed="${S.lang==="en"}" data-act="lang" data-v="en">English</button>
+    <button class="chip" aria-pressed="${S.lang==="ru"}" data-act="lang" data-v="ru">Русский</button>
+  </div>
+  <div class="rule">${ico.clock}<span>${t("r1")}</span></div>
+  <div class="rule">${ico.bag}<span>${t("r2")}</span></div>
+  <div class="rule">${ico.leaf}<span>${t("r3")}</span></div>
+  <h3>${t("noEat")}</h3>
+  <div class="chips wrap">${Object.keys(DIET.en).map(d=>`<button class="chip" data-act="diet" data-v="${d}" aria-pressed="${S.diet.has(d)}">${DIET[S.lang][d]}</button>`).join("")}</div>
+  <p class="hint" style="margin-top:8px">${t("noEatHint")}</p>
+  <div class="grow"></div>
+  <button class="btn" data-act="go" data-v="home" style="margin-top:20px">${t("start")}</button>
+</div>`;
+
+function card(b){
+  const out = b.left===0, h = hits(b);
+  return `<button class="card ${out?"out":""}" data-act="open" data-v="${b.id}" aria-label="${b.name}, ${fmt(b.price)}${out?", "+t("sold"):""}">
+    <span class="sticker ${out?"gone":""}"><b>${out?"—":b.price.toLocaleString("ru-RU")}</b><s>${fmt(b.worth)}</s></span>
+    <span class="meta"><p class="name">${b.name}</p><p class="kind">${b.kind[S.lang]}</p>
+      <span class="row"><span>${ico.clock}${b.from}–${b.to}</span><span>${ico.pin}${b.km} km</span><span class="left">${out?t("sold"):t("left")(b.left)}</span></span>
+      ${out?`<span class="hint">${t("soldNext")}</span>`:""}
+      ${h.length&&!out?`<span class="warnline">${S.lang==="en"?"Contains":"Есть"}: ${h.map(x=>DIET[S.lang][x]).join(", ")}</span>`:""}
+    </span></button>`;
+}
+V.home = () => {
+  const list = visible();
+  const filters = `<div class="chips" role="group" aria-label="Filters">
+    <button class="chip" data-act="f" data-v="now" aria-pressed="${S.f.now}">${t("now")}</button>
+    <button class="chip" data-act="f" data-v="km" aria-pressed="${S.f.km}">${t("km")}</button>
+    ${[...S.diet].map(d=>`<button class="chip" data-act="diet" data-v="${d}" aria-pressed="true">${S.lang==="en"?"no":"без"} ${DIET[S.lang][d]} <span class="x" aria-hidden="true">×</span></button>`).join("")}
+  </div>`;
+  let body;
+  if (S.loading) body = `<div class="pad" aria-busy="true">${'<div class="sk"></div>'.repeat(4)}</div>`;
+  else if (!list.length) body = `<div class="empty">${bagArt(96)}<h3>${t("emptyT")}</h3><p>${t("emptyP")}</p><button class="btn ghost" data-act="clear">${t("clear")}</button></div>`;
+  else if (S.view==="map") body = `<div class="map" role="img" aria-label="Map with ${list.length} venues">
+      <svg width="100%" height="100%" viewBox="0 0 350 330" preserveAspectRatio="none" aria-hidden="true">
+       <rect width="350" height="330" fill="#E9EEE6"/><path d="M0 120 L350 95" stroke="#fff" stroke-width="14"/><path d="M120 0 L150 330" stroke="#fff" stroke-width="12"/>
+       <path d="M0 250 L350 225" stroke="#fff" stroke-width="9"/><path d="M260 0 L285 330" stroke="#fff" stroke-width="9"/>
+       <rect x="170" y="130" width="70" height="70" rx="10" fill="#D6E5D3"/><text x="205" y="170" font-size="11" text-anchor="middle" fill="#56635B" font-family="Onest">IITU</text></svg>
+      <span class="me" style="left:47%;top:50%"></span>
+      ${list.map(b=>`<button class="pin ${b.left?"":"out"}" style="left:${b.x}%;top:${b.y}%" data-act="open" data-v="${b.id}" aria-label="${b.name}"><span>${b.left?b.price.toLocaleString("ru-RU")+" ₸":t("sold")}</span></button>`).join("")}
+    </div><div class="pad">${list.filter(b=>b.left).slice(0,2).map(card).join("")}</div>`;
+  else body = `<div class="pad">${list.sort((a,b)=>(b.left>0)-(a.left>0)||a.km-b.km).map(card).join("")}</div>`;
+  return `<div class="top" style="padding-top:4px"><div style="flex:1"><h2>${t("today")}</h2><p class="lead">${ico.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${t("near")}</p></div><span class="badge">${t("demo")}</span></div>
+  <div class="impact"><b>412</b><span>${t("saved")}</span></div>
+  <div class="seg" role="group" aria-label="View"><button data-act="view" data-v="list" aria-pressed="${S.view==="list"}">${t("list")}</button><button data-act="view" data-v="map" aria-pressed="${S.view==="map"}">${t("map")}</button></div>
+  ${filters}<div style="height:12px"></div>${body}`;
+};
+
+V.box = () => {
+  const b = BOXES.find(x=>x.id===S.box), h = hits(b), out=b.left===0;
+  return `<div class="hero">${bagArt(150)}<button class="back" data-act="go" data-v="home" aria-label="Back">${ico.back}</button>
+    <span class="sticker big ${out?"gone":""}"><b>${out?"—":b.price.toLocaleString("ru-RU")+" ₸"}</b><s>${fmt(b.worth)}</s></span></div>
+  <div class="pad" style="padding-top:18px">
+    <h2 style="font-size:24px;margin:0">${b.name}</h2><p class="lead">${b.kind[S.lang]} · ${ico.star.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px;color:#C99700"')} ${b.rating}</p>
+    ${h.length?`<div class="alert warn" style="margin-top:14px">${ico.warn}<span>${t("mayContain")(h.map(x=>DIET[S.lang][x]).join(", "))}</span></div>`:""}
+    <div class="facts">
+      <div class="fact"><small>${t("pickup")}</small><b>${b.from}–${b.to}</b></div>
+      <div class="fact"><small>${t("dist")}</small><b>${b.km} km</b></div>
+      <div class="fact"><small>${t("worth")}</small><b>${fmt(b.worth)}</b></div>
+      <div class="fact"><small>${S.lang==="en"?"Left today":"Осталось"}</small><b>${out?t("sold"):b.left+" / "+b.total}</b></div>
+    </div>
+    <h3>${t("inside")}</h3><ul class="list">${b.inside[S.lang].map(x=>`<li>${x}</li>`).join("")}</ul>
+    <h3>${t("allerg")}</h3><div class="chips wrap">${b.all.map(a=>`<span class="tag ${S.diet.has(a)?"hit":""}">${S.diet.has(a)?ico.warn.replace('<svg','<svg width="14" height="14"'):""}${DIET[S.lang][a]}</span>`).join("")}</div>
+    ${out?"":`<h3>${t("howMany")}</h3><div class="stepper"><button data-act="qty" data-v="-1" aria-label="One less" ${S.qty<=1?"disabled":""}>−</button><output aria-live="polite">${S.qty}</output><button data-act="qty" data-v="1" aria-label="One more" ${S.qty>=b.left?"disabled":""}>+</button></div>`}
+  </div>
+  <div class="sticky">${out?`<button class="btn" disabled>${t("sold")}</button><p class="note">${t("soldNext")}</p>`:
+    `<button class="btn" data-act="paysheet">${t("reserve")(fmt(b.price*S.qty))}</button><p class="note">${t("cancelRule")}</p>`}</div>`;
+};
+
+function paySheet(){
+  const b = BOXES.find(x=>x.id===S.box);
+  return `<div class="scrim" data-act="closeModal"><div class="sheet" role="dialog" aria-modal="true" aria-label="${t("payT")}" data-stop>
+   <div class="grab"></div><h2 style="margin:0 0 14px;font-size:20px">${t("payT")}</h2>
+   ${S.payErr?`<div class="alert err" role="alert">${ico.err}<span>${t("payErr")}</span></div>`:""}
+   <label class="pay"><input type="radio" name="pm" value="kaspi" ${S.pay==="kaspi"?"checked":""} data-act="pm"> <span style="flex:1;font-weight:600">${t("kaspi")}</span></label>
+   <label class="pay"><input type="radio" name="pm" value="card" ${S.pay==="card"?"checked":""} data-act="pm"> <span style="flex:1;font-weight:600">${t("card")}</span></label>
+   <div class="sum"><span>${t("boxes")} × ${S.qty}</span><span>${fmt(b.price*S.qty)}</span></div>
+   <div class="sum"><span>${t("fee")}</span><span>${t("free")}</span></div>
+   <div class="sum total"><span>${t("total")}</span><span>${fmt(b.price*S.qty)}</span></div>
+   <label class="check"><input type="checkbox" data-act="checked" ${S.checked?"checked":""}><span>${t("iChecked")}: <b>${b.from}–${b.to}</b>${hits(b).length?`, <b style="color:#6B4D00">${hits(b).map(x=>DIET[S.lang][x]).join(", ")}</b>`:""}</span></label>
+   <button class="btn" data-act="pay" ${S.checked?"":"disabled"}>${t("pay")(fmt(b.price*S.qty))}</button>
+  </div></div>`;
+}
+function cancelDialog(){
+  return `<div class="scrim center" data-act="closeModal"><div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="cq" data-stop>
+   <h2 id="cq" style="margin:0 0 8px;font-size:20px">${t("cancelQ")}</h2><p class="lead" style="margin-bottom:18px">${t("cancelP")}</p>
+   <div class="two"><button class="btn ghost" data-act="closeModal">${t("keep")}</button><button class="btn danger" data-act="doCancel">${t("yesCancel")}</button></div>
+  </div></div>`;
+}
+
+function minsUntil(hhmm){ const [h,m]=hhmm.split(":").map(Number); return (h*60+m)-(S.now.getHours()*60+S.now.getMinutes()); }
+V.ticket = () => {
+  const o = S.orders[S.orders.length-1]; if(!o) return V.orders();
+  const b = BOXES.find(x=>x.id===o.id), mins = minsUntil(b.from), canFree = mins>60;
+  const cancelBy = (()=>{const [h,m]=b.from.split(":").map(Number);return String(h-1).padStart(2,"0")+":"+String(m).padStart(2,"0")})();
+  return `<div class="top"><button class="back" data-act="go" data-v="home" aria-label="Back">${ico.back}</button><h2>${t("paidT")}</h2></div>
+  <div class="ticket"><span class="sticker"><b>${S.lang==="en"?"saved":"спасено"}</b></span>
+    <small>${t("code")}</small><div class="code">${o.code}</div>
+    <small>${mins>0?t("startsIn"):t("open")}</small>
+    <div class="count">${mins>0?`<b id="cd">${Math.floor(mins/60)}:${String(mins%60).padStart(2,"0")}:00</b>`:`<b>${b.from}–${b.to}</b>`}</div>
+    <p style="margin:12px 0 0;font-size:15px"><b>${b.name}</b> · ${o.qty} × ${fmt(b.price)}</p>
+  </div>
+  <ol class="steps"><li>${t("s1")} ${b.from} – ${b.to}</li><li>${t("s2")}</li><li>${t("s3")}</li></ol>
+  <div class="pad" style="margin-top:8px">
+    ${canFree?`<button class="btn danger" data-act="askCancel">${t("cancel")}</button><p class="note">${t("cancelRule")} (${cancelBy})</p>`
+      :`<p class="note">${t("lateCancel")}${cancelBy}</p>`}
+  </div>`;
+};
+
+V.orders = () => {
+  const kg = S.past.reduce((a,p)=>a+p.kg,0) + S.orders.reduce((a,o)=>a+1.2*o.qty,0);
+  const act = S.orders.map(o=>{const b=BOXES.find(x=>x.id===o.id);return `<button class="card" data-act="ticket" data-v="${o.code}"><span class="sticker" style="width:60px;height:60px"><b style="font-size:16px">${o.code.slice(3)}</b></span><span class="meta"><p class="name">${b.name}</p><span class="row"><span>${ico.clock}${b.from}–${b.to}</span><span class="left">${t("code")}: ${o.code}</span></span></span></button>`}).join("");
+  return `<div class="top"><h2>${t("orders")}</h2></div>
+  <div class="impact"><b>${kg.toFixed(1)}</b><span>${t("yourKg")}</span></div>
+  <div class="pad"><h3>${t("active")}</h3>
+   ${act || `<div class="empty" style="padding:10px 10px 20px">${bagArt(80)}<h3>${t("noOrders")}</h3><p>${t("noOrdersP")}</p><button class="btn ghost" data-act="go" data-v="home">${t("find")}</button></div>`}
+   <h3>${t("past")}</h3>${S.past.map(p=>`<div class="live"><span><b>${p.name}</b><br><span class="hint">${p.date} · ${fmt(p.price)}</span></span><span class="left">${p.kg} kg</span></div>`).join("")}
+  </div>`;
+};
+
+V.profile = () => `<div class="top"><h2>${t("profile")}</h2></div>
+  <div class="pad"><h3>${t("lang")}</h3><div class="chips wrap"><button class="chip" aria-pressed="${S.lang==="en"}" data-act="lang" data-v="en">English</button><button class="chip" aria-pressed="${S.lang==="ru"}" data-act="lang" data-v="ru">Русский</button></div>
+  <h3>${t("prefs")}</h3><div class="chips wrap">${Object.keys(DIET.en).map(d=>`<button class="chip" data-act="diet" data-v="${d}" aria-pressed="${S.diet.has(d)}">${DIET[S.lang][d]}</button>`).join("")}</div>
+  <div style="height:28px"></div><button class="btn ghost" data-act="side">${S.side==="user"?t("partnerSide"):t("userSide")}</button></div>`;
+
+/* ---------- partner side ---------- */
+V.pHome = () => {
+  const P=S.partner, kg=(P.boxes.reduce((a,b)=>a+b.sold,0)*1.2).toFixed(1);
+  return `<div class="top"><div style="flex:1"><h2>${t("pHome")}</h2><p class="lead">Nan & Co · ${S.lang==="en"?"Partner":"Партнёр"}</p></div></div>
+  <div class="impact"><b>${kg}</b><span>${t("kgToday")}</span></div>
+  <div class="pad">${P.boxes.map(b=>`<div class="live"><span><b>${b.what.map(w=>ITEMS[S.lang][ITEMS.en.indexOf(w)]).join(", ")}</b><br><span class="hint">${b.from}–${b.to} · ${fmt(b.price)}</span><div class="bar"><i style="width:${b.sold/b.count*100}%"></i></div><span class="hint">${t("sold2")(b.sold,b.count)}</span></span></div>`).join("")}
+  <button class="btn" data-act="go" data-v="pPost" style="margin-top:8px">${ico.plus.replace('<svg','<svg width="20" height="20"')} ${t("pPost")}</button>
+  <div style="height:10px"></div><button class="btn ghost" data-act="go" data-v="pCheck">${t("pCheck")}</button></div>`;
+};
+V.pPost = () => {
+  const P=S.partner, E=P.errs, shelf = 2400;
+  return `<div class="top"><button class="back" data-act="go" data-v="pHome" aria-label="Back">${ico.back}</button><h2>${t("pPost")}</h2></div>
+  <form class="pad" id="postForm" novalidate>
+   <fieldset style="border:0;padding:0;margin:0"><legend class="f" style="font-weight:600;font-size:14px;margin:8px 0 6px">${t("pWhat")}</legend>
+   <div class="chips wrap">${ITEMS.en.map((it,i)=>`<button type="button" class="chip" data-act="pWhat" data-v="${it}" aria-pressed="${P.what.has(it)}">${ITEMS[S.lang][i]}</button>`).join("")}</div>
+   <p class="hint">${t("pWhatHint")}</p>${E.what?`<p class="err-t">${ico.err.replace('<svg','<svg width="14" height="14"')}${t("pErrWhat")}</p>`:""}</fieldset>
+   <label class="f">${t("pCount")}</label>
+   <div class="stepper"><button type="button" data-act="pCount" data-v="-1" aria-label="One less" ${P.count<=1?"disabled":""}>−</button><output>${P.count}</output><button type="button" data-act="pCount" data-v="1" aria-label="One more" ${P.count>=20?"disabled":""}>+</button></div>
+   <div class="two"><div><label class="f" for="pf">${t("pFrom")}</label><input class="input" id="pf" type="time" value="${P.from}" data-act="pTime" data-v="from" ${E.time?'aria-invalid="true"':""}></div>
+   <div><label class="f" for="pt">${t("pTo")}</label><input class="input" id="pt" type="time" value="${P.to}" data-act="pTime" data-v="to" ${E.time?'aria-invalid="true" aria-describedby="te"':""}></div></div>
+   ${E.time?`<p class="err-t" id="te">${ico.err.replace('<svg','<svg width="14" height="14"')}${t("pErrTime")}</p>`:""}
+   <label class="f" for="pp">${t("pPrice")}</label><input class="input" id="pp" inputmode="numeric" value="${P.price}" data-act="pPrice" ${E.price?'aria-invalid="true"':""}>
+   <p class="hint">${t("pPriceHint")(fmt(shelf))}</p>${E.price?`<p class="err-t">${ico.err.replace('<svg','<svg width="14" height="14"')}${t("pErrPrice")}</p>`:""}
+   <div style="height:20px"></div><button class="btn" type="submit">${t("publish")}</button><div style="height:20px"></div>
+  </form>`;
+};
+V.pCheck = () => {
+  const m = S.partner.codeMsg;
+  return `<div class="top"><button class="back" data-act="go" data-v="pHome" aria-label="Back">${ico.back}</button><h2>${t("pCheck")}</h2></div>
+  <form class="pad" id="codeForm" novalidate><label class="f" for="cc">${t("codeLabel")}</label>
+   <input class="input" id="cc" placeholder="SQ-4821" autocomplete="off" style="font-size:22px;letter-spacing:.06em;text-transform:uppercase" ${m&&!m.ok?'aria-invalid="true"':""}>
+   ${m?`<div class="alert ${m.ok?"":"err"}" role="status" style="margin-top:12px;${m.ok?"background:var(--green-soft);color:var(--green)":""}">${m.ok?ico.check:ico.err}<span>${m.text}</span></div>`:""}
+   <div style="height:16px"></div><button class="btn" type="submit">${t("checkBtn")}</button>
+   <p class="hint" style="margin-top:12px">Demo: ${S.orders.length?S.orders.map(o=>o.code).join(", "):"SQ-4821"}</p></form>`;
+};
+
+/* ---------------- render + actions ---------------- */
+function tabs(){
+  const items = S.side==="user"
+    ? [["home",ico.bag,t("home")],["orders",ico.list,t("ordersTab")],["profile",ico.user,t("profileTab")]]
+    : [["pHome",ico.bag,t("pHome")],["pPost",ico.plus,t("pPost")],["profile",ico.user,t("profileTab")]];
+  return items.map(([k,i,l])=>`<button data-act="go" data-v="${k}" ${S.tab===k?'aria-current="page"':""}>${i}<span>${l}</span></button>`).join("");
+}
+function render(focus){
+  document.documentElement.lang = S.lang;
+  const scr = $("#screen");
+  scr.innerHTML = V[S.screen]() + (S.modal==="pay"?paySheet():S.modal==="cancel"?cancelDialog():"") +
+    (S.toast?`<div class="toast" role="status">${ico.check}<span>${S.toast}</span></div>`:"");
+  $("#tabbar").style.display = S.screen==="welcome" ? "none" : "";
+  $("#tabbar").innerHTML = tabs();
+  if (focus) { scr.scrollTop = 0; scr.focus({preventScroll:true}); }
+  const pf = $("#postForm"); if (pf) pf.onsubmit = publish;
+  const cf = $("#codeForm"); if (cf) cf.onsubmit = checkCode;
+  jumpList();
+}
+function go(v){
+  S.modal=null;
+  if (["home","orders","profile","pHome","pPost"].includes(v)) S.tab=v;
+  if (v==="home" && S.loading) setTimeout(()=>{S.loading=false;render()},700);
+  S.screen=v; render(true);
+}
+function toast(msg){ S.toast=msg; render(); clearTimeout(toast.t); toast.t=setTimeout(()=>{S.toast=null;render()},3200); }
+function publish(e){
+  e.preventDefault(); const P=S.partner, E={};
+  if(!P.what.size) E.what=1; if(P.to<=P.from) E.time=1; if(!(P.price>0 && P.price<=1200)) E.price=1;
+  P.errs=E; if(Object.keys(E).length){ render(); return; }
+  P.boxes.push({what:[...P.what],count:P.count,sold:0,from:P.from,to:P.to,price:P.price});
+  const live = P.boxes.reduce((a,b)=>a+b.count-b.sold,0);
+  S.screen="pHome"; S.tab="pHome"; toast(t("published")(live));
+}
+function checkCode(e){
+  e.preventDefault(); const v=$("#cc").value.trim().toUpperCase().replace(/\s/g,"");
+  const ok = S.orders.some(o=>o.code===v) || v==="SQ-4821";
+  S.partner.codeMsg = {ok, text: ok?t("okCode")("Aruzhan"):t("badCode")}; render();
+}
+document.addEventListener("click", e=>{
+  const el = e.target.closest("[data-act]"); if(!el) return;
+  if (el.dataset.act==="closeModal" && e.target.closest("[data-stop]") && !e.target.closest('button[data-act="closeModal"]')) return;
+  const a=el.dataset.act, v=el.dataset.v;
+  switch(a){
+   case "lang": S.lang=v; render(); break;
+   case "diet": S.diet.has(v)?S.diet.delete(v):S.diet.add(v); render(); break;
+   case "go": go(v); break;
+   case "f": S.f[v]=!S.f[v]; render(); break;
+   case "view": S.view=v; render(); break;
+   case "clear": S.f={now:false,km:false}; S.diet.clear(); render(); break;
+   case "open": S.box=v; S.qty=1; S.screen="box"; render(true); break;
+   case "qty": S.qty=Math.max(1,S.qty+Number(v)); render(); break;
+   case "paysheet": S.modal="pay"; S.checked=false; S.payErr=false; render(); break;
+   case "pm": S.pay=el.value; break;
+   case "checked": S.checked=el.checked; render(); break;
+   case "pay": {
+     const b=BOXES.find(x=>x.id===S.box);
+     if (b.failOnce && S.pay==="card" && !b.failed){ b.failed=true; S.payErr=true; render(); $(".alert.err")?.focus?.(); break; }
+     b.left-=S.qty; const code="SQ-"+String(1000+Math.floor(Math.random()*9000));
+     S.orders.push({id:b.id,qty:S.qty,code}); S.modal=null; S.screen="ticket"; S.tab="orders"; render(true); break; }
+   case "closeModal": S.modal=null; render(); break;
+   case "askCancel": S.modal="cancel"; render(); break;
+   case "doCancel": { const o=S.orders.pop(); const b=BOXES.find(x=>x.id===o.id); b.left+=o.qty; S.modal=null; S.screen="orders"; S.tab="orders"; toast(t("cancelled")); break; }
+   case "ticket": { const i=S.orders.findIndex(o=>o.code===v); S.orders.push(S.orders.splice(i,1)[0]); S.screen="ticket"; render(true); break; }
+   case "side": S.side=S.side==="user"?"partner":"user"; go(S.side==="user"?"home":"pHome"); break;
+   case "pWhat": S.partner.what.has(v)?S.partner.what.delete(v):S.partner.what.add(v); render(); break;
+   case "pCount": S.partner.count=Math.min(20,Math.max(1,S.partner.count+Number(v))); render(); break;
+  }
+});
+document.addEventListener("change", e=>{
+  const el=e.target; if(el.dataset.act==="pTime"){ S.partner[el.dataset.v]=el.value; }
+  if(el.dataset.act==="pPrice"){ S.partner.price=Number(el.value.replace(/\D/g,"")); }
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && S.modal){ S.modal=null; render(); }});
+
+/* countdown on the ticket: one real-time tick per second */
+setInterval(()=>{ const cd=$("#cd"); if(!cd) return;
+  let [hh,mm,s]=cd.textContent.split(":").map(Number); let tot=hh*3600+mm*60+s; if(tot<=0) return; tot--;
+  cd.textContent=Math.floor(tot/3600)+":"+String(Math.floor(tot%3600/60)).padStart(2,"0")+":"+String(tot%60).padStart(2,"0"); },1000);
+
+/* desktop jump list (for the demo at the defence) */
+function jumpList(){
+  const j=$("#jump"); if(!j) return;
+  const L=[["welcome","Start"],["home","Boxes nearby"],["box:baur","Allergen warning"],["box:sweet","Sold out"],["empty","Empty state"],["orders","My boxes"],["partner","Partner: post a box"]];
+  j.innerHTML=L.map(([k,l])=>`<button data-jump="${k}">${l}</button>`).join("");
+}
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-jump]"); if(!b) return; const k=b.dataset.jump; S.modal=null;
+  if(k==="welcome"){ S.side="user"; go("welcome"); }
+  else if(k==="home"){ S.side="user"; S.loading=false; go("home"); }
+  else if(k.startsWith("box:")){ S.side="user"; S.loading=false; if(k==="box:baur") S.diet.add("meat"); S.box=k.slice(4); S.qty=1; S.screen="box"; S.tab="home"; render(true); }
+  else if(k==="empty"){ S.side="user"; S.loading=false; S.f.km=true; S.f.now=true; S.diet.add("gluten"); S.dietStrict=true; go("home"); S.dietStrict=false; }
+  else if(k==="orders"){ S.side="user"; go("orders"); }
+  else if(k==="partner"){ S.side="partner"; go("pPost"); }
+});
+
+/* deep links for screenshots: ?s=home|box&b=id|ticket|orders|pPost|pHome|pCheck|empty|pay|payerr&lang=ru&diet=dairy */
+(function(){
+  const q=new URLSearchParams(location.search); if(q.get("lang")) S.lang=q.get("lang");
+  (q.get("diet")||"").split(",").filter(Boolean).forEach(d=>S.diet.add(d));
+  const s=q.get("s"); if(!s){ render(true); return; }
+  S.loading = s==="loading"; S.screen = s==="loading"?"home":s;
+  if(s==="empty"){ S.screen="home"; S.f={now:true,km:true}; S.dietStrict=true; }
+  if(["box","pay","payerr"].includes(s)){ S.screen="box"; S.box=q.get("b")||"nan"; }
+  if(s==="pay"||s==="payerr"){ S.modal="pay"; S.checked=true; S.payErr = s==="payerr"; }
+  if(s==="ticket"||s==="cancel"){ S.screen="ticket"; const b=BOXES.find(x=>x.id===(q.get("b")||"baur")); b.left--; S.orders.push({id:b.id,qty:1,code:"SQ-4821"}); if(s==="cancel") S.modal="cancel"; }
+  if(s==="map"){ S.screen="home"; S.view="map"; }
+  if(s.startsWith("p")&&s!=="pay"&&s!=="payerr"){ S.side="partner"; }
+  if(s==="pPostErr"){ S.screen="pPost"; S.partner.what.clear(); S.partner.to="19:00"; S.partner.errs={what:1,time:1}; }
+  if(s==="pCheck"){ S.partner.codeMsg={ok:true,text:T[S.lang].okCode("Aruzhan")}; }
+  S.tab = {home:"home",orders:"orders",ticket:"orders",pHome:"pHome",pPost:"pPost",pPostErr:"pPost"}[S.screen]||S.tab;
+  render(true);
+})();
+</script>
+</body>
+</html>
